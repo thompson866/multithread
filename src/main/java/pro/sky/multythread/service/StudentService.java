@@ -35,9 +35,9 @@ public class StudentService {
         return studentRepository.findByAgeLessThan(age);
     }
 
-    public Collection<Student> getAll() {
-        return studentRepository.findAll();
-    }
+//    public Collection<Student> getAll() {
+//        return studentRepository.findAll();
+//    }
 
     public Collection<Student> getStudentsByAgeBetween(int minAge, int maxAge) {
         return studentRepository.findStudentsByAgeBetween(minAge, maxAge);
