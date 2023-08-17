@@ -28,14 +28,14 @@ class StudentServiceTest {
 
 	@Test
 	void addStudentTest() {
-        Student student = new Student(1, "AAAA", 17, null);
+        Student student = new Student(1, "harry", 10, null);
 		when(repositoryMock.save(student)).thenReturn(student);
 		assertEquals(student, out.addStudent(student));
 	}
 
 	@Test
 	void getStudentPositiveTest() {
-        Student student = new Student(1L, "AAAA", 17, null);
+        Student student = new Student(1L, "harry", 10, null);
         when(repositoryMock.findById(1L)).thenReturn(Optional.of(student));
         assertEquals(student, out.getStudent(1));
 	}
@@ -48,13 +48,13 @@ class StudentServiceTest {
 
 	@Test
 	void editStudentTest() {
-		Student student = new Student(1, "CCC", 35, null);
+		Student student = new Student(1, "ron", 11, null);
         when(repositoryMock.save(student)).thenReturn(student);
 		assertEquals(student, out.editStudent(student));
 	}
 	@Test
 	void getStudentsByAgePositiveTest() {
-		Student student = new Student(4,"DDD", 30, null);
+		Student student = new Student(4,"harry", 11, null);
         when(repositoryMock.findByAgeLessThan(31)).thenReturn(List.of(student));
 		assertIterableEquals(List.of(student), out.getStudentsByAge(31));
 	}

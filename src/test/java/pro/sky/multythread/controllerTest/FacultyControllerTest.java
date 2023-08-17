@@ -53,7 +53,7 @@ public class FacultyControllerTest {
     void getFacultyPositiveTest() throws Exception {
         long id = 1;
         String name = "Faculty";
-        String color = "green";
+        String color = "yellow";
         Faculty faculty = new Faculty(id, name, color);
 
         when(facultyRepository.findById(anyLong())).thenReturn(Optional.of(faculty));
@@ -79,23 +79,23 @@ public class FacultyControllerTest {
 
     @Test
     void getFacultyByColorPositiveTest() throws Exception {
-        Faculty f1 = new Faculty(1, "A", "green");
-        Faculty f2 = new Faculty(2, "B", "green");
+        Faculty faculty0 = new Faculty(1, "A", "yellow");
+        Faculty faculty1 = new Faculty(2, "B", "yellow");
 
-        List<Faculty> list = List.of(f1, f2);
+        List<Faculty> list = List.of(faculty0, faculty1);
 
         when(facultyRepository.findByColorLike(anyString())).thenReturn(list);
 
-        mvc.perform(get("/faculty/color/green")
+        mvc.perform(get("/faculty/color/yellow")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$.[0].id").value(f1.getId()))
-                .andExpect(jsonPath("$.[0].name").value(f1.getName()))
-                .andExpect(jsonPath("$.[0].color").value(f1.getColor()))
-                .andExpect(jsonPath("$.[1].id").value(f2.getId()))
-                .andExpect(jsonPath("$.[1].name").value(f2.getName()))
-                .andExpect(jsonPath("$.[1].color").value(f2.getColor()));
+                .andExpect(jsonPath("$.[0].id").value(faculty0.getId()))
+                .andExpect(jsonPath("$.[0].name").value(faculty0.getName()))
+                .andExpect(jsonPath("$.[0].color").value(faculty0.getColor()))
+                .andExpect(jsonPath("$.[1].id").value(faculty1.getId()))
+                .andExpect(jsonPath("$.[1].name").value(faculty1.getName()))
+                .andExpect(jsonPath("$.[1].color").value(faculty1.getColor()));
 
     }
 
@@ -112,7 +112,7 @@ public class FacultyControllerTest {
     void addFacultyTest() throws Exception {
         long id = 1;
         String name = "A";
-        String color = "green";
+        String color = "yellow";
         Faculty faculty = new Faculty(id, name, color);
 
         JSONObject jo = new JSONObject();
@@ -136,7 +136,7 @@ public class FacultyControllerTest {
     void editFacultyPositiveTest() throws Exception {
         long id = 1;
         String name = "A";
-        String color = "green";
+        String color = "yellow";
         Faculty faculty = new Faculty(id, name, color);
 
         JSONObject jo = new JSONObject();
@@ -174,30 +174,30 @@ public class FacultyControllerTest {
 
     @Test
     void findFacultyByColorOrNameTest() throws Exception {
-        Faculty f1 = new Faculty(1, "A", "green");
-        Faculty f2 = new Faculty(2, "B", "green");
+        Faculty faculty0 = new Faculty(1, "A", "yellow");
+        Faculty faculry1 = new Faculty(2, "B", "yellow");
 
-        List<Faculty> list = List.of(f1, f2);
+        List<Faculty> list = List.of(faculty0, faculry1);
 
         when(facultyRepository.findAllByColorContainingIgnoreCaseOrNameContainingIgnoreCase(anyString(), anyString()))
                 .thenReturn(list);
 
-        mvc.perform(get("/faculty/color-or-name?param=green")
+        mvc.perform(get("/faculty/color-or-name?param=yellow")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$.[0].id").value(f1.getId()))
-                .andExpect(jsonPath("$.[0].name").value(f1.getName()))
-                .andExpect(jsonPath("$.[0].color").value(f1.getColor()))
-                .andExpect(jsonPath("$.[1].id").value(f2.getId()))
-                .andExpect(jsonPath("$.[1].name").value(f2.getName()))
-                .andExpect(jsonPath("$.[1].color").value(f2.getColor()));
+                .andExpect(jsonPath("$.[0].id").value(faculty0.getId()))
+                .andExpect(jsonPath("$.[0].name").value(faculty0.getName()))
+                .andExpect(jsonPath("$.[0].color").value(faculty0.getColor()))
+                .andExpect(jsonPath("$.[1].id").value(faculry1.getId()))
+                .andExpect(jsonPath("$.[1].name").value(faculry1.getName()))
+                .andExpect(jsonPath("$.[1].color").value(faculry1.getColor()));
     }
 
     @Test
     void getStudentsTest() throws Exception {
-        Faculty f1 = new Faculty(1, "Faculty1", "green");
+        Faculty f1 = new Faculty(1, "Faculty1", "yellow");
         Faculty f2 = new Faculty(2, "Faculty2", "red");
         Student s1 = new Student(1, "A", 10, f1);
         Student s2 = new Student(2, "B", 20, f1);

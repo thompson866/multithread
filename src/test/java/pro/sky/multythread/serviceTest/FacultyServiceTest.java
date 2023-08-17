@@ -29,14 +29,14 @@ public class FacultyServiceTest {
 
     @Test
     void addFacultyTest() {
-        Faculty faculty = new Faculty(4,"DDD", "green");
+        Faculty faculty = new Faculty(4,"grif", "yellow");
         when(repositoryMock.save(faculty)).thenReturn(faculty);
         assertEquals(faculty, out.addFaculty(faculty));
     }
 
     @Test
     void getFacultyPositiveTest() {
-        Faculty faculty = new Faculty(4,"DDD", "green");
+        Faculty faculty = new Faculty(4,"grif", "yellow");
         when(repositoryMock.findById(4L)).thenReturn(Optional.of(faculty));
         assertEquals(faculty, out.getFaculty(4));
     }
@@ -57,16 +57,16 @@ public class FacultyServiceTest {
 
     @Test
     void getFacultiesByColorPositiveTest() {
-        Faculty f = new Faculty(4,"DDD", "green");
-        when(repositoryMock.findByColorLike("green")).thenReturn(List.of(f));
-        assertIterableEquals(List.of(f), out.getFacultiesByColor("green"));
+        Faculty f = new Faculty(4,"grif", "yellow");
+        when(repositoryMock.findByColorLike("yellow")).thenReturn(List.of(f));
+        assertIterableEquals(List.of(f), out.getFacultiesByColor("yellow"));
     }
 
     @Test
     void getFacultiesByColorNegativeTest() {
         List<Faculty> test = Collections.emptyList();
-        when(repositoryMock.findByColorLike("black")).thenReturn(test);
-        assertIterableEquals(test, out.getFacultiesByColor("black"));
+        when(repositoryMock.findByColorLike("red")).thenReturn(test);
+        assertIterableEquals(test, out.getFacultiesByColor("red"));
     }
 
 }
