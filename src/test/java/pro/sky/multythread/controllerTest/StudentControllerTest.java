@@ -112,7 +112,6 @@ class StudentControllerTest {
                 new ParameterizedTypeReference<>() {
                 });
         assertEquals(studentsExpected, studentsActual.getBody());
-
     }
 
     @Test
