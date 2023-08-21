@@ -1,209 +1,145 @@
 package pro.sky.multythread.controllerTest;
 
-import org.json.JSONObject;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import pro.sky.multythread.controller.StudentController;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import pro.sky.multythread.model.Faculty;
 import pro.sky.multythread.model.Student;
 import pro.sky.multythread.repository.StudentRepository;
-import pro.sky.multythread.service.StudentService;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.Random;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.boot.test.context.SpringBootTest.*;
 
-@WebMvcTest(controllers = StudentController.class)
-public class StudentControllerTest {
+
+@ExtendWith(MockitoExtension.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+class StudentControllerTest {
+
+    @LocalServerPort
+    private int port;
+    @Autowired
+    private StudentRepository studentRepository;
 
     @Autowired
-    MockMvc mvc;
+    private TestRestTemplate restTemplate;
 
-    @MockBean
-    StudentRepository studentRepository;
+    private final Random random = new Random();
+    int counter = 0;
 
-    @SpyBean
-    StudentService studentService;
+    StudentControllerTest() {
+    }
 
-    @InjectMocks
-    StudentController studentController;
+    @AfterEach
+    public void clearRepository() {
+        studentRepository.deleteAll();
+        counter = 0;
+    }
+
+    private Student createTestStudent(Integer age) {
+        Student studentTest = new Student();
+        studentTest.setAge((age == null) ? random.nextInt(100) : age);
+        studentTest.setName("TestStudent" + counter++);
+        return studentTest;
+    }
 
     @Test
-    void getStudentPositiveTest() throws Exception {
-        long id = 1;
-        String name = "A";
+    void addStudentTest() {
+        Student studentIn = createTestStudent(null);
+        Student studentOut = restTemplate.postForObject("http://localhost:" + port + "/student/add", studentIn, Student.class);
+        assertEquals(studentIn.getName(), studentOut.getName());
+        assertEquals(studentIn.getAge(), studentOut.getAge());
+        assertNotNull(studentOut.getId());
+    }
+
+    @Test
+    void getStudentTest() {
+        Student studentIn = createTestStudent(null);
+        Student studentExpected = restTemplate.postForObject("http://localhost:" + port + "/student/add", studentIn, Student.class);
+        Student studentActual = restTemplate.getForObject("http://localhost:" + port + "/student/get/" + studentExpected.getId(), Student.class);
+        assertEquals(studentExpected.getName(), studentActual.getName());
+        assertEquals(studentExpected.getAge(), studentActual.getAge());
+        assertEquals(studentExpected.getId(), studentActual.getId());
+    }
+
+    @Test
+    void updateStudentTest() {
+        Student studentIn = restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(null), Student.class);
+        Student expectedStudent = new Student();
+        expectedStudent.setName("updatedStudent");
+        expectedStudent.setAge(10);
+        expectedStudent.setId(studentIn.getId());
+        ResponseEntity<Student> responseEntity = restTemplate.exchange("http://localhost:" + port + "/student/update", HttpMethod.PUT, new HttpEntity<>(expectedStudent), Student.class);
+        Student studentOut = responseEntity.getBody();
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(expectedStudent.getName(), studentOut.getName());
+        assertEquals(expectedStudent.getAge(), studentOut.getAge());
+        assertEquals(expectedStudent.getId(), studentOut.getId());
+    }
+
+    @Test
+    void removeStudent() {
+        Student studentIn = restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(null), Student.class);
+        ResponseEntity<Student> responseEntity = restTemplate.exchange("http://localhost:" + port + "/student/remove/" + studentIn.getId(), HttpMethod.DELETE, new HttpEntity<>(studentIn.getId()), Student.class);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    void getStudentsByAgeTest() {
+        Collection<Student> studentsExpected = new ArrayList<>();
         int age = 11;
-        Student s1 = new Student(id, name, age);
-
-        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(s1));
-
-        mvc.perform(get("/student/1")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.name").value(name))
-                .andExpect(jsonPath("$.age").value(age));
-
-        verify(studentRepository, times(1)).findById(id);
-    }
-
-    @Test
-    void getStudentNegativeTest() throws Exception {
-        when(studentRepository.findById(anyLong())).thenReturn(Optional.empty());
-
-        mvc.perform(get("/student/42")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void getStudentByAgePositiveTest() throws Exception {
-        Student s1 = new Student(1, "A", 10);
-        Student s2 = new Student(2, "B", 10);
-
-        List<Student> list = List.of(s1, s2);
-
-        when(studentRepository.findByAgeLessThan(anyInt())).thenReturn(list);
-
-        mvc.perform(get("/student/age/10")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$.[0].id").value(s1.getId()))
-                .andExpect(jsonPath("$.[0].name").value(s1.getName()))
-                .andExpect(jsonPath("$.[0].age").value(s1.getAge()))
-                .andExpect(jsonPath("$.[1].id").value(s2.getId()))
-                .andExpect(jsonPath("$.[1].name").value(s2.getName()))
-                .andExpect(jsonPath("$.[1].age").value(s2.getAge()));
+        restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(11), Student.class);
+        studentsExpected.add(restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(age), Student.class));
+        studentsExpected.add(restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(age), Student.class));
+        ResponseEntity<List<Student>> studentsActual = restTemplate.exchange(
+                "http://localhost:" + port + "/student/get?age=" + age,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {
+                });
+        assertEquals(studentsExpected, studentsActual.getBody());
 
     }
 
     @Test
-    void getStudentByAgeNegativeTest() throws Exception {
-        when(studentRepository.findByAgeLessThan(anyInt())).thenReturn(Collections.emptyList());
-
-        mvc.perform(get("/student/age/100500")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+    void findByAgeBetweenTest() {
+        Collection<Student> studentsExpected = new ArrayList<>();
+        studentsExpected.add(restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(11), Student.class));
+        studentsExpected.add(restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(14), Student.class));
+        restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(16), Student.class);
+        ResponseEntity<List<Student>> studentsActual = restTemplate.exchange(
+                "http://localhost:" + port + "/student/get?minAge=" + 10 + "&maxAge=" + 14,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {
+                });
+        assertEquals(studentsExpected, studentsActual.getBody());
     }
 
     @Test
-    void addStudentTest() throws Exception {
-        long id = 1;
-        String name = "A";
-        int age = 11;
-        Student s = new Student(id, name, age);
-
-        JSONObject jo = new JSONObject();
-        jo.put("name", name);
-        jo.put("age", age);
-
-        when(studentRepository.save(any(Student.class))).thenReturn(s);
-
-        mvc.perform(post("/student")
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jo.toString()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.name").value(name))
-                .andExpect(jsonPath("$.age").value(age));
-
-    }
-
-    @Test
-    void editStudentPositiveTest() throws Exception {
-        long id = 1;
-        String name = "A";
-        int age = 11;
-        Student s = new Student(id, name, age);
-
-        JSONObject jo = new JSONObject();
-        jo.put("name", name);
-        jo.put("age", age);
-
-        when(studentRepository.save(any(Student.class))).thenReturn(s);
-
-        mvc.perform(put("/student")
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jo.toString()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.name").value(name))
-                .andExpect(jsonPath("$.age").value(age));
-
-    }
-
-    @Test
-    void editStudentNegativeTest() throws Exception {
-        when(studentRepository.save(any(Student.class))).thenReturn(null);
-
-        mvc.perform(put("/student")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void removeStudentTest() throws Exception {
-        mvc.perform(delete("/student/1")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void findStudentsByAgeBetweenTest() throws Exception {
-        Student s1 = new Student(1, "A", 10);
-        Student s2 = new Student(2, "B", 20);
-
-        List<Student> list = List.of(s1, s2);
-
-        when(studentRepository.findStudentsByAgeBetween(anyInt(), anyInt())).thenReturn(list);
-
-        mvc.perform(get("/student/age-between")
-                        .param("minAge", "10")
-                        .param("maxAge", "20")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$.[0].id").value(s1.getId()))
-                .andExpect(jsonPath("$.[0].name").value(s1.getName()))
-                .andExpect(jsonPath("$.[0].age").value(s1.getAge()))
-                .andExpect(jsonPath("$.[1].id").value(s2.getId()))
-                .andExpect(jsonPath("$.[1].name").value(s2.getName()))
-                .andExpect(jsonPath("$.[1].age").value(s2.getAge()));
-    }
-
-    @Test
-    void getFacultyTest() throws Exception {
-        Faculty faculty = new Faculty(1, "Faculty", "green");
-        Student student = new Student(1, "Student", 15);
-        student.setFaculty(faculty);
-
-        when(studentRepository.findById(anyLong())).thenReturn(Optional.of(student));
-
-        mvc.perform(get("/student/faculty/1")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(faculty.getId()))
-                .andExpect(jsonPath("$.name").value(faculty.getName()))
-                .andExpect(jsonPath("$.color").value(faculty.getColor()));
+    void getStudentFacultyTest() {
+        Student studentIn = createTestStudent(null);
+        Faculty faculty = new Faculty();
+        faculty.setName("testFaculty");
+        faculty.setColor("testColor");
+        Faculty facultyOut = restTemplate.postForObject("http://localhost:" + port + "/faculty/add", faculty, Faculty.class);
+        studentIn.setFaculty(facultyOut);
+        Student studentOut = restTemplate.postForObject("http://localhost:" + port + "/student/add", studentIn, Student.class);
+        Faculty facultyActual = restTemplate.getForObject("http://localhost:" + port + "/student/" + studentOut.getId() + "/getFaculty", Faculty.class);
+        assertEquals(studentIn.getFaculty(), facultyActual);
     }
 }
