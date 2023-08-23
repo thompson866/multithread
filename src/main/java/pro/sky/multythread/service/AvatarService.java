@@ -1,6 +1,7 @@
 package pro.sky.multythread.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pro.sky.multythread.model.Avatar;
@@ -82,4 +83,13 @@ public class AvatarService {
             return baos.toByteArray();
         }
     }
+
+//
+//
+//    public Collection<AvatarsList> downloadAllAvatars(int pageNumber, int pageSize) {
+//        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
+//        return avatarRepository.downloadAllAvatars(pageRequest);
+//    }
+
+
 }

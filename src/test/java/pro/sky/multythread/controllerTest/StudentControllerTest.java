@@ -5,7 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
@@ -13,9 +15,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
 import pro.sky.multythread.model.Faculty;
 import pro.sky.multythread.model.Student;
+import pro.sky.multythread.repository.FacultyRepository;
 import pro.sky.multythread.repository.StudentRepository;
+import pro.sky.multythread.service.StudentService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +29,6 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.*;
-
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -59,12 +63,13 @@ class StudentControllerTest {
 
     @Test
     void addStudentTest() {
-        Student studentIn = createTestStudent(null);
+        Student studentIn = createTestStudent(1);
         Student studentOut = restTemplate.postForObject("http://localhost:" + port + "/student/add", studentIn, Student.class);
         assertEquals(studentIn.getName(), studentOut.getName());
         assertEquals(studentIn.getAge(), studentOut.getAge());
         assertNotNull(studentOut.getId());
     }
+
 
     @Test
     void getStudentTest() {
@@ -78,7 +83,7 @@ class StudentControllerTest {
 
     @Test
     void updateStudentTest() {
-        Student studentIn = restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(null), Student.class);
+        Student studentIn = restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(11), Student.class);
         Student expectedStudent = new Student();
         expectedStudent.setName("updatedStudent");
         expectedStudent.setAge(10);
@@ -91,6 +96,7 @@ class StudentControllerTest {
         assertEquals(expectedStudent.getId(), studentOut.getId());
     }
 
+
     @Test
     void removeStudent() {
         Student studentIn = restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(null), Student.class);
@@ -98,11 +104,12 @@ class StudentControllerTest {
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
     }
 
+
     @Test
     void getStudentsByAgeTest() {
         Collection<Student> studentsExpected = new ArrayList<>();
-        int age = 11;
-        restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(11), Student.class);
+        int age = 15;
+        restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(null), Student.class);
         studentsExpected.add(restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(age), Student.class));
         studentsExpected.add(restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(age), Student.class));
         ResponseEntity<List<Student>> studentsActual = restTemplate.exchange(
@@ -112,10 +119,11 @@ class StudentControllerTest {
                 new ParameterizedTypeReference<>() {
                 });
         assertEquals(studentsExpected, studentsActual.getBody());
+
     }
 
     @Test
-    void findByAgeBetweenTest() {
+    void getStudentsByAgeBetweenTest() {
         Collection<Student> studentsExpected = new ArrayList<>();
         studentsExpected.add(restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(11), Student.class));
         studentsExpected.add(restTemplate.postForObject("http://localhost:" + port + "/student/add", createTestStudent(14), Student.class));

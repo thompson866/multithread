@@ -55,14 +55,14 @@ class StudentServiceTest {
 	@Test
 	void getStudentsByAgePositiveTest() {
 		Student student = new Student(4,"harry", 11, null);
-        when(repositoryMock.findByAgeLessThan(31)).thenReturn(List.of(student));
+        when(repositoryMock.findByAge(31)).thenReturn(List.of(student));
 		assertIterableEquals(List.of(student), out.getStudentsByAge(31));
 	}
 
 	@Test
 	void getStudentsByAgeNegativeTest() {
 		List<Student> test = Collections.emptyList();
-        when(repositoryMock.findByAgeLessThan(31)).thenReturn(test);
+        when(repositoryMock.findByAge(31)).thenReturn(test);
 		assertIterableEquals(test, out.getStudentsByAge(31));
 	}
  }

@@ -3,6 +3,7 @@ package pro.sky.multythread.controller;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pro.sky.multythread.model.Avatar;
@@ -53,10 +54,19 @@ public class AvatarController {
         Path path = Path.of(avatar.getFilePath());
 
         try (InputStream is = Files.newInputStream(path);
-             OutputStream os = response.getOutputStream();){
+             OutputStream os = response.getOutputStream();) {
             response.setContentType(avatar.getMediaType());
             response.setContentLength((int) avatar.getFileSize());
             is.transferTo(os);
         }
     }
+
+//
+//    @Transactional
+//    @GetMapping("allAvatars")
+//    public ResponseEntity<Collection<AvatarsList>> downloadAllAvatars(@RequestParam(name = "page") Integer pageNumber,
+//                                                                      @RequestParam(name = "size") Integer pageSize) {
+//        Collection<AvatarsList> avatars = avatarService.downloadAllAvatars(pageNumber, pageSize);
+//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(avatars);
+//    }
 }
