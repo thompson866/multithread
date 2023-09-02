@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import pro.sky.multythread.model.Avatar;
 import pro.sky.multythread.model.Student;
 import pro.sky.multythread.repository.AvatarRepository;
+import pro.sky.multythread.repository.AvatarsPagins;
 
 import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
@@ -15,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
@@ -84,12 +86,12 @@ public class AvatarService {
         }
     }
 
-//
-//
-//    public Collection<AvatarsList> downloadAllAvatars(int pageNumber, int pageSize) {
-//        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
-//        return avatarRepository.downloadAllAvatars(pageRequest);
-//    }
+
+
+    public Collection<AvatarsPagins> downloadAllAvatars(int pageNumber, int pageSize) {
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize);
+        return avatarRepository.downloadAllAvatars(pageRequest);
+    }
 
 
 }

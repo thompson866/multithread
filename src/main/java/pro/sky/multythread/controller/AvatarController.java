@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pro.sky.multythread.model.Avatar;
+import pro.sky.multythread.repository.AvatarsPagins;
 import pro.sky.multythread.service.AvatarService;
 
 
@@ -16,6 +17,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/student")
@@ -61,12 +63,12 @@ public class AvatarController {
         }
     }
 
-//
-//    @Transactional
-//    @GetMapping("allAvatars")
-//    public ResponseEntity<Collection<AvatarsList>> downloadAllAvatars(@RequestParam(name = "page") Integer pageNumber,
-//                                                                      @RequestParam(name = "size") Integer pageSize) {
-//        Collection<AvatarsList> avatars = avatarService.downloadAllAvatars(pageNumber, pageSize);
-//        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(avatars);
-//    }
+
+    @Transactional
+    @GetMapping("allAvatars")
+    public ResponseEntity<Collection<AvatarsPagins>> downloadAllAvatars(@RequestParam(name = "page") Integer pageNumber,
+                                                                        @RequestParam(name = "size") Integer pageSize) {
+        Collection<AvatarsPagins> avatars = avatarService.downloadAllAvatars(pageNumber, pageSize);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(avatars);
+    }
 }
