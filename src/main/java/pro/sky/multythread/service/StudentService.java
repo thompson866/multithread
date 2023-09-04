@@ -15,6 +15,21 @@ public class StudentService {
         this.studentRepository = studentRepository;
     }
 
+
+    public Integer getAllStudentsCount() {
+        return studentRepository.getAllStudentCount();
+    }
+
+    public Integer getStudentsAvgAge() {
+        return studentRepository.getStudentsAverage();
+    }
+
+    public Collection<Student> getLastFiveStudentById() {
+        return studentRepository.getLastFiveStudent();
+    }
+
+
+
     public Student addStudent(Student student) {
         return studentRepository.save(student);
     }
@@ -32,7 +47,7 @@ public class StudentService {
     }
 
     public Collection<Student> getStudentsByAge(int age) {
-        return studentRepository.findByAgeLessThan(age);
+        return studentRepository.findByAge(age);
     }
 
 //    public Collection<Student> getAll() {
@@ -43,11 +58,7 @@ public class StudentService {
         return studentRepository.findStudentsByAgeBetween(minAge, maxAge);
     }
 
-    public Faculty getFaculty(long id) {
-        Student student =  studentRepository.findById(id).orElse(null);
-        if (student == null) {
-            return null;
-        }
-        return student.getFaculty();
+    public Faculty getStudentFaculty(Long id) {
+        return getStudent(id).getFaculty();
     }
 }
