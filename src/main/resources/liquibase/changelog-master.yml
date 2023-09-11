@@ -5,3 +5,7 @@ databaseChangeLog:
       changes:
         - sqlFile:
             path: liquibase/scripts/lesson-three.sql
+
+
+
+
