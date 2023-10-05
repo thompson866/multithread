@@ -3,11 +3,15 @@ package pro.sky.multythread.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import pro.sky.multythread.exceptions.NoElementException;
 import pro.sky.multythread.model.Faculty;
 import pro.sky.multythread.model.Student;
 import pro.sky.multythread.repository.StudentRepository;
 
 import java.util.Collection;
+import java.util.OptionalDouble;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class StudentService {
@@ -57,6 +61,29 @@ public class StudentService {
         return getStudent(id).getFaculty();
 
     }
+
+    public Collection<String> getStudentsWhenNamesBeginningA() {
+        return studentRepository.findAll()
+                .stream()
+                .map(s -> s.getName().toUpperCase())
+                .filter(n -> n.startsWith("A"))
+                .collect(Collectors.toList());
+    }
+
+    public Double getAverageStudentsAge() {
+        OptionalDouble averageAge = studentRepository.findAll()
+                .stream()
+                .map(Student::getAge)
+                .mapToInt(a -> a)
+                .average();
+        averageAge.orElseThrow(NoElementException::new);
+        return Math.floor(averageAge.getAsDouble());
+    }
+
+    public int getParallelCalculationsValue() {
+        return Stream.iterate(1, a -> a + 1).limit(1_000_000).parallel().reduce(0, Integer::sum);
+    }
+
 
 //
 //

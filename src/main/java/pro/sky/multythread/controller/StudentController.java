@@ -30,6 +30,10 @@ public class StudentController {
 
     @PostMapping("add")
     public ResponseEntity<Student> addStudent(@RequestBody Student student) {
+
+
+
+
         Student addedStudent = studentService.addStudent(student);
         return ResponseEntity.ok(addedStudent);
     }
@@ -65,6 +69,19 @@ public class StudentController {
     public Faculty getStudentFaculty(@PathVariable Long id) {
         return studentService.getStudentFaculty(id);
     }
+
+
+    @GetMapping("whenNamesBeginA")
+    public Collection<String> getStudentsWhenNamesBeginningA() {
+        return studentService.getStudentsWhenNamesBeginningA();
+    }
+
+    @GetMapping("averageStudentsAge")
+    public Double getAverageStudentsAge() {
+        return studentService.getAverageStudentsAge();
+    }
+
+
 
 
 

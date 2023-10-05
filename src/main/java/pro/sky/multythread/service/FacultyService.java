@@ -3,14 +3,14 @@ package pro.sky.multythread.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import pro.sky.multythread.exceptions.NoElementException;
 import pro.sky.multythread.model.Faculty;
 import pro.sky.multythread.model.Student;
 import pro.sky.multythread.repository.FacultyRepository;
 import pro.sky.multythread.repository.StudentRepository;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
+
+import java.util.*;
+import java.util.stream.Stream;
 
 @Service
 public class FacultyService {
@@ -61,6 +61,18 @@ public class FacultyService {
     public Collection<Student> getStudents(Long facultyId) {
         logger.info("call getStudents method");
         return getFaculty(facultyId).getStudents();
+    }
+
+    public String getLongFaculty() {
+        Optional<String> longestName = facultyRepository.findAll()
+                .stream()
+                .map(Faculty::getName)
+                .max(Comparator.comparing(String::length));
+        return longestName.orElseThrow(NoElementException::new);
+    }
+
+    public int getReturnNumber() {
+        return Stream.iterate(1, a -> a + 1).limit(1_000_000).parallel().reduce(0, Integer::sum);
     }
 }
 //
