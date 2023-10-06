@@ -77,4 +77,5 @@ public class FacultyController {
     public int getReturnNumber(){
         return facultyService.getReturnNumber();
     }
+
 }

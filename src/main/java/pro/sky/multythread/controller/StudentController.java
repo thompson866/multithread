@@ -9,6 +9,7 @@ import pro.sky.multythread.service.StudentService;
 
 
 import java.util.Collection;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/student")
@@ -79,6 +80,16 @@ public class StudentController {
     @GetMapping("averageStudentsAge")
     public Double getAverageStudentsAge() {
         return studentService.getAverageStudentsAge();
+    }
+
+
+    @GetMapping("getAllThread")
+    public void getMethodThreadStudent() {
+        studentService.getMethodThreadStudent();
+    }
+    @GetMapping("getAllMultythread")
+    public void getMethodMultythreadStudent() {
+        studentService.getMethodMultythreadStudent();
     }
 
 

@@ -80,8 +80,28 @@ public class StudentService {
         return Math.floor(averageAge.getAsDouble());
     }
 
-    public int getParallelCalculationsValue() {
-        return Stream.iterate(1, a -> a + 1).limit(1_000_000).parallel().reduce(0, Integer::sum);
+    public void getMethodThreadStudent() {
+        Collection<Student> students = studentRepository.findAll();
+        System.out.println("method1");
+        students.forEach(student -> System.out.print(student.getName() + " "));
+        System.out.println();
+        students.stream().limit(2).map(Student::getName).forEach(System.out::println);
+        new Thread(() -> students.stream().skip(2).limit(2).map(Student::getName).forEach(System.out::println)).start();
+        new Thread(() -> students.stream().skip(4).limit(2).map(Student::getName).forEach(System.out::println)).start();
+    }
+
+    public void getMethodMultythreadStudent() {
+        Collection<Student> students = studentRepository.findAll();
+        System.out.println("method2");
+        students.forEach(student -> System.out.print(student.getName() + " "));
+        System.out.println();
+        printToConsole(students.stream().limit(2).map(Student::getName).collect(Collectors.toList()));
+        new Thread(() -> printToConsole(students.stream().skip(2).limit(2).map(Student::getName).collect(Collectors.toList()))).start();
+        new Thread(() -> printToConsole(students.stream().skip(4).limit(2).map(Student::getName).collect(Collectors.toList()))).start();
+    }
+
+    private synchronized void printToConsole(Collection<String> nameList) {
+        nameList.forEach(System.out::println);
     }
 
 
